@@ -1,0 +1,205 @@
+Concurrency in Go
+14 Sep 2018
+Tags: go, golang, concurrency
+
+Erin Stanfill
+Engineer, Truss
+erin@truss.works
+http://truss.works/
+@elstanfill
+https://github.com/tinyels
+
+* Erin Stanfill
+
+.image portrait-2.jpg 313 250
+.image truss_logo_grey.jpg
+.caption @elstanfill
+
+: Hi, I am Erin Stanfill an engineer at Truss where we we help organizations adopt an infrastructure-first approach to deliver software reliably
+: I've been writing software a long time, but I am fairly new to go. 
+
+* Agenda
+- what is concurrency
+- mechanisms for writing concurrent programs in go
+- common errors in concurrent programs and how to prevent them in go
+
+* Concurrency is the ability of different parts of a process to be executed out-of-order without affecting the final outcome
+: Let's use a real world example to talk about what this means and why we care. 
+
+* Nom nom
+.background tuxedo-cake.jpg
+: Let's bake a cake
+
+* Recipe
+.image fudgecake.jpg
+: recipes are a type of program, right? We take input, perform operations, and produce a baked good.
+
+* Recipe
+.image sequential-cake-from-recipe.png
+: here is a simplified diagram of the previous recipe, where I have made the steps that will take longer taller
+: however I can rearrange some of the steps and it doesn't affect the cake.
+
+* Recipe
+.image sequential-cake.png
+: I can preheat the oven first
+
+
+* Recipe
+.image sequential-cake-reordered.png
+: or I can have everything ready and then preheat the oven.
+: honestly, I do this more often than I like
+: Why does this irritate me? Because then I have to wait for it to preheat. This highlights something a little off from these diagrams.
+: usually when we bake, we let the oven preheat while we prep.
+
+* Recipe 
+.image parallel-cake.png
+: That is, we performs steps in parallel to save time. This parallelism is only possible because of concurrent nature of the process. 
+
+* Concurrency in Go
+: Cakes are great but what does this have to do with go? There are two things you may be wondering about now. 
+: 1. How to express a concurrent process in go
+: 2. How to set such a process up so that it runs in parallel
+: The answer to these questions is why go is such a powerful language.
+
+* With Go, the developer should take care of concurrency; the Go runtime will take care of parallelism. 
+
+* Goroutines
+Goroutines are functions that run concurrently with other functions.
+
+
+* Goroutines are not threads
+: thread is the basic unit of cpu utilization   
+: goroutines are much cheaper
+: the go scheduler multiplexes goroutines onto a set of threads. 
+: That is many goroutines could be run within a thread (for instance context switching when blocked);
+: and a goroutine can be moved to other threads (on other processors).
+: There is a great talk about how go schedules at that just came out this week from GopherCon (see https://www.youtube.com/watch?v=YHRO5WQGh0k)
+
+* Goroutine
+
+A function is run in a goroutine by prefacing the function call with the keyword "go".
+
+A sequential snippet of code
+
+  preheat()
+  bake() // doesn't start until preheat has finished
+
+It's concurrent implementation
+
+  go preheat()
+  bake() // doesn't wait for preheat to finish (or start!)
+: let's see some go concurrency in action
+
+* A Serial Cake
+.code x.go /^func wait/,/^}/
+.code x.go /^func do/,/^}/
+.play x.go  /^func main/,/^}/
+: first of all the serial implementation
+
+
+* A Concurrent Cake
+.play x2.go /^func main/,/^}/
+: a dash of concurrency!
+: we saved 20 minutes in the kitchen!
+
+* Bake off
+.background bakeoff.png
+: lets have a bake off
+
+* Bake!
+.code bakeoff.go /^func bakeCake/,/^}
+.play bakeoff.go /^func main/,/^}/
+
+* What just happened?
+
+* Race condition
+.image raceCondition.png
+: A race condition occurs when the output is dependent on the sequence or timing of other uncontrollable events
+
+* Race condition
+.image bake-off.png 403 950
+
+* coordination of goroutines
+
+- WaitGroups
+- Mutex
+- Channels
+
+* WaitGroup
+
+A WaitGroup waits for a collection of goroutines to finish. The main goroutine calls Add to set the number of goroutines to wait for. Then each of the goroutines runs and calls Done when finished. At the same time, Wait can be used to block until all goroutines have finished.
+
+* Waiting with a WaitGroup
+.play bakeoff.1.go /^func main/,/^}/
+: explain function literal
+
+* Be careful with loops and lambdas
+Variables declared in for loops are passed by reference
+.play bakeoff.2.go /^func main/,/^}/
+: When you declare a new variable inside of a for loop, it is important to remember that the variables aren’t being redeclared with each iteration. Instead the variable is the same, but instead the value that is stored in the variable is being updated.
+
+* loops and lambdas, con't
+function parameters in Go are passed by value
+.play bakeoff.3.go /^func main/,/^}/
+: If we modify the previous lambda so that it takes a parameter, we can ensure that the goroutine runs with the value it had at time of composition
+
+* Serendipity
+.play -edit x2.go /^func main/,/^}/ HLxxx
+: let's return to our original baking.
+
+: what happens if a partner greases the pan? (go line 21)
+: what happens if I can mix faster? (change time)
+: we have some race conditions here hidden by magical timing
+: so how do we prevent this?
+
+* Hot oven, do not touch!
+.background oven.jpg
+: exclusive use of oven is needed for preheat and bake
+
+* Locks
+.play -edit lock.go /START OMIT/,/END OMIT/
+
+: what happens if change times
+: what happens if move more things into Goroutines
+: how do we make sure that the cake is mixed before it is put in oven? (another lock?)
+: exclusive use of ingredients is needed for mix and bake
+
+: * Don't communicate by sharing memory, share memory by communicating.
+
+* Channels
+
+Channels are how goroutines communicate with one another
+
+: You can send values into channels from one goroutine and receive those values into another goroutine.
+: receiver blocks Waiting
+.play toast.go  /^func main/,/^}/
+
+* coordinating with channels
+: sends and receives block until both the sender and receiver are ready.
+.play -edit channel.go /START OMIT/,/END OMIT/
+: what happens if mixing ingredients takes too long?
+
+* more conditions
+.play -edit channel.1.go /START OMIT/,/END OMIT/
+
+* waiting on cake
+.play channel.3.go /START OMIT/,/END OMIT/
+
+* handling received data
+.play channel.4.go /START OMIT/,/END OMIT/
+
+
+: Channels: good for
+: passing ownership of data,
+: distributing units of work,
+: communicating async results
+: Mutex good for:	caches, state
+
+* Select
+
+: Go’s select lets you wait on multiple channel operations. 
+.code channel.2.go /^func do/,/^}/
+.play channel.2.go /START OMIT/,/END OMIT/
+
+
+* Conclusion
