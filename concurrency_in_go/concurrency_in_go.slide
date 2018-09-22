@@ -1,5 +1,5 @@
 Concurrency in Go
-14 Sep 2018
+22 Sep 2018
 Tags: go, golang, concurrency
 
 Erin Stanfill
@@ -7,16 +7,17 @@ Engineer, Truss
 erin@truss.works
 http://truss.works/
 @elstanfill
-https://github.com/tinyels
+https://github.com/tinyels/presentations
 
 * Erin Stanfill
-
 .image portrait-2.jpg 313 250
 .image truss_logo_grey.jpg
-.caption @elstanfill
 
-: Hi, I am Erin Stanfill an engineer at Truss where we we help organizations adopt an infrastructure-first approach to deliver software reliably
-: I've been writing software a long time, but I am fairly new to go. 
+@elstanfill
+https://github.com/tinyels/presentations
+
+: Hi, I am Erin Stanfill I've been writing software for a long time, but am fairly new to go. These days I am engineer at Truss where we we help organizations build the infrastructure they need to deliver software reliably. Go is our preferred language for doing this work and its first class support for concurrency plays a large part in that preference.  I'm excited to get to talk to you about concurrency and go. I'll be posting links to some great references on twitter later today if you want to follow me, and these slides are in this github repo.
+
 
 * Agenda
 - what is concurrency
@@ -55,25 +56,44 @@ https://github.com/tinyels
 .image parallel-cake.png
 : That is, we performs steps in parallel to save time. This parallelism is only possible because of concurrent nature of the process. 
 
+* Concurrency vs parallelism
+- concurrency is the composition of independently executing processes
+- parallelism is the simultaneous execution of computations
+- concurrency can enable parallelism
+
+* Benefits of parallelism
+: in a kitchen parallel tasks mean we can prepare a meal faster. Parallelism also enables having all of the parts of a meal ready at the same time
+- can complete tasks in less time
+- can use available computational resources more efficiently
+
 * Concurrency in Go
-: Cakes are great but what does this have to do with go? There are two things you may be wondering about now. 
 : 1. How to express a concurrent process in go
 : 2. How to set such a process up so that it runs in parallel
 : The answer to these questions is why go is such a powerful language.
 
 * With Go, the developer should take care of concurrency; the Go runtime will take care of parallelism. 
 
+* Concurrency in Go
+
+- creating concurrent tasks (Goroutines)
+- coordinating concurrent tasks
+- messaging between concurrent tasks
+
 * Goroutines
 Goroutines are functions that run concurrently with other functions.
 
 
 * Goroutines are not threads
-: thread is the basic unit of cpu utilization   
+
+- many goroutines can be run on one thread
+- the scheduler may move a goroutine to other threads
+- goroutines use less memory and can start up faster
+: thread is the basic unit of cpu utilization, but when you write multithreaded code you have to manage the threads and the work on them. 
 : goroutines are much cheaper
 : the go scheduler multiplexes goroutines onto a set of threads. 
 : That is many goroutines could be run within a thread (for instance context switching when blocked);
 : and a goroutine can be moved to other threads (on other processors).
-: There is a great talk about how go schedules at that just came out this week from GopherCon (see https://www.youtube.com/watch?v=YHRO5WQGh0k)
+: There is a great talk about how go schedules work that just came out this week from GopherCon (see https://www.youtube.com/watch?v=YHRO5WQGh0k)
 
 * Goroutine
 
@@ -101,6 +121,8 @@ It's concurrent implementation
 .play x2.go /^func main/,/^}/
 : a dash of concurrency!
 : we saved 20 minutes in the kitchen!
+
+* concurrency gotchas
 
 * Bake off
 .background bakeoff.png
@@ -164,6 +186,17 @@ function parameters in Go are passed by value
 : how do we make sure that the cake is mixed before it is put in oven? (another lock?)
 : exclusive use of ingredients is needed for mix and bake
 
+* Locking Pitfalls
+
+Writing correct code with locks is hard
+
+Deadlocks
+.code lock.1.go   /^func funcA/,/^}/
+.play lock.1.go   /^func main/,/^}/
+: The risk of a deadlock increases when multiple locks with fine granularities are used. 
+: Accordingly, the use of coarse locks is often recommended in order to avoid deadlocks. 
+: Identifying large critical sections and guarding them by locks not just ensures serialized access. 
+: In fact, coarse locks result in an eventually sequential execution of threads. This is contrary to our prior goal of increased parallelism.
 : * Don't communicate by sharing memory, share memory by communicating.
 
 * Channels
@@ -173,6 +206,11 @@ Channels are how goroutines communicate with one another
 : You can send values into channels from one goroutine and receive those values into another goroutine.
 : receiver blocks Waiting
 .play toast.go  /^func main/,/^}/
+
+* Channels block
+so you can have a deadlock with channels too
+.play toast.1.go  /^func main/,/^}/
+
 
 * coordinating with channels
 : sends and receives block until both the sender and receiver are ready.
@@ -188,6 +226,9 @@ Channels are how goroutines communicate with one another
 * handling received data
 .play channel.4.go /START OMIT/,/END OMIT/
 
+* Range 
+.code range.go  /^func makeCakeAndSend/,/^}/
+.play range.go  /^func main/,/^}/
 
 : Channels: good for
 : passing ownership of data,
