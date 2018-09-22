@@ -122,6 +122,10 @@ It's concurrent implementation
 : a dash of concurrency!
 : we saved 20 minutes in the kitchen!
 
+* Race conditions
+.image raceCondition.png
+: A race condition occurs when the output is dependent on the sequence or timing of other uncontrollable events
+
 * Bake off
 .background bakeoff.png
 : lets have a bake off
@@ -154,6 +158,7 @@ A WaitGroup waits for a collection of goroutines to finish. The main goroutine c
 Variables declared in for loops are passed by reference
 .play bakeoff.2.go /^func main/,/^}/
 : When you declare a new variable inside of a for loop, it is important to remember that the variables aren’t being redeclared with each iteration. Instead the variable is the same, but instead the value that is stored in the variable is being updated.
+: this is a race condition ( show tool?)
 
 * loops and lambdas, con't
 function parameters in Go are passed by value
@@ -251,3 +256,13 @@ Go provides mechanisms for different styles of concurrency
 have to be conscientious of how we deal with shared state to avoid race conditions and deadlocks
 
 : Error handling
+: use channel for  struct with result and potential errors
+
+
+: https://golang.org/doc/articles/race_detector.html
+: A deadlock situation can arise if all of the following conditions hold simultaneously in a system:
+
+: Mutual exclusion: at least one resource must be held in a non-shareable mode.Only one process can use the resource at any given instant of time.
+: Hold and wait or resource holding: a process is currently holding at least one resource and requesting additional resources which are being held by other processes.
+: No preemption: a resource can be released only voluntarily by the process holding it.
+: Circular wait: a process must be waiting for a resource which is being held by another process, which in turn is waiting for the first process to release the resource. In general, there is a set of waiting processes, P = {P1, P2, …, PN}, such that P1 is waiting for a resource held by P2, P2 is waiting for a resource held by P3 and so on until PN is waiting for a resource held by P1.
