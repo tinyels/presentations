@@ -7,14 +7,14 @@ Engineer, Truss
 erin@truss.works
 http://truss.works/
 @elstanfill
-https://github.com/tinyels/presentations
+https://tinyels.github.io/presentations/
 
 * Erin Stanfill
 .image portrait-2.jpg 313 250
 .image truss_logo_grey.jpg
 
 @elstanfill
-https://github.com/tinyels/presentations
+https://tinyels.github.io/presentations/
 
 : Hi, I am Erin Stanfill I've been writing software for a long time, but am fairly new to go. These days I am an engineer at Truss where we we help organizations build the infrastructure they need to deliver software reliably. Go is our preferred language for doing this work and its first class support for concurrency plays a large part in that preference.  I'm excited to get to talk to you about concurrency and go. I'll be posting links to some great references on twitter later today if you want to follow me, and these slides are in this github repo.
 
