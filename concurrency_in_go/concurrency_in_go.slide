@@ -22,7 +22,7 @@ https://github.com/tinyels/presentations
 * Agenda
 - what is concurrency
 - mechanisms for writing concurrent programs in go
-- common errors in concurrent programs and how to prevent them in go
+- common errors in concurrent programs
 
 * Concurrency is the ability of different parts of a process to be executed out-of-order without affecting the final outcome
 : Let's use a real world example to talk about what this means and why we care. 
@@ -60,9 +60,10 @@ https://github.com/tinyels/presentations
 - concurrency is the composition of independently executing processes
 - parallelism is the simultaneous execution of computations
 - concurrency can enable parallelism
+: concurrency also enables having all of the parts of a meal ready at the same time
 
 * Benefits of parallelism
-: in a kitchen parallel tasks mean we can prepare a meal faster. Parallelism also enables having all of the parts of a meal ready at the same time
+: in a kitchen parallel tasks mean we can prepare a meal faster.
 - can complete tasks in less time
 - can use available resources more efficiently
 
@@ -125,6 +126,7 @@ It's concurrent implementation
 * Race conditions
 .image raceCondition.png
 : A race condition occurs when the output is dependent on the sequence or timing of other uncontrollable events
+: https://golang.org/doc/articles/race_detector.html
 
 * Bake off
 .background bakeoff.png
@@ -164,10 +166,6 @@ Variables declared in for loops are passed by reference
 function parameters in Go are passed by value
 .play bakeoff.3.go /^func main/,/^}/
 : If we modify the previous lambda so that it takes a parameter, we can ensure that the goroutine runs with the value it had at time of composition
-
-* Race conditions
-.image raceCondition.png
-: A race condition occurs when the output is dependent on the sequence or timing of other uncontrollable events
 
 * Serendipity
 .play -edit x2.go /^func main/,/^}/ HLxxx
@@ -249,9 +247,25 @@ Channels are how goroutines communicate with one another
 * Deadlocks with channels
 .play -edit toast.1.go  /^func main/,/^}/
 
+* Requirements for Deadlocks
+Mutual Exclusion
+Hold and Wait
+No preemption
+Circular wait
 
-* Conclusion
+: in these examples, the deadlocks are somewhat obvious. One of the big advantages to channels is that the way they are used reduces the likelihood that you will introduce a deadlock
+: it usually has to do with channel ownership: it's scope is too big, or it's ownership is unclear (who sends and who receives)
+: A deadlock situation can arise if all of the following conditions hold simultaneously in a system:
+: Mutual exclusion: at least one resource must be held in a non-shareable mode.Only one process can use the resource at any given instant of time.
+: Hold and wait or resource holding: a process is currently holding at least one resource and requesting additional resources which are being held by other processes.
+: No preemption: a resource can be released only voluntarily by the process holding it.
+: Circular wait: a process must be waiting for a resource which is being held by another process, which in turn is waiting for the first process to release the resource. In general, there is a set of waiting processes, P = {P1, P2, …, PN}, such that P1 is waiting for a resource held by P2, P2 is waiting for a resource held by P3 and so on until PN is waiting for a resource held by P1.
+
+* Wrap up
 Understanding the concurrent nature of a process can enable parallelism
+
+: timing and ordering
+
 Go provides mechanisms for different styles of concurrency
 have to be conscientious of how we deal with shared state to avoid race conditions and deadlocks
 
@@ -259,10 +273,3 @@ have to be conscientious of how we deal with shared state to avoid race conditio
 : use channel for  struct with result and potential errors
 
 
-: https://golang.org/doc/articles/race_detector.html
-: A deadlock situation can arise if all of the following conditions hold simultaneously in a system:
-
-: Mutual exclusion: at least one resource must be held in a non-shareable mode.Only one process can use the resource at any given instant of time.
-: Hold and wait or resource holding: a process is currently holding at least one resource and requesting additional resources which are being held by other processes.
-: No preemption: a resource can be released only voluntarily by the process holding it.
-: Circular wait: a process must be waiting for a resource which is being held by another process, which in turn is waiting for the first process to release the resource. In general, there is a set of waiting processes, P = {P1, P2, …, PN}, such that P1 is waiting for a resource held by P2, P2 is waiting for a resource held by P3 and so on until PN is waiting for a resource held by P1.
