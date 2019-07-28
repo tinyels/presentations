@@ -39,24 +39,24 @@ https://tinyels.github.io/presentations/
 : recipes are a type of program, right? We take input, perform operations, and produce a baked good.
 
 * Recipe
-.image sequential-cake-from-recipe.png
+.image Sequential-Cake-from-recipe.png
 : here is a simplified diagram of the previous recipe, where I have made the steps that will take longer taller
 : however I can rearrange some of the steps and it doesn't affect the cake.
 
 * Recipe
-.image sequential-cake.png
+.image Sequential-Cake.png
 : I can preheat the oven first
 
 
 * Recipe
-.image sequential-cake-reordered.png
+.image Sequential-Cake-reordered.png
 : or I can have everything ready and then preheat the oven.
 : honestly, I do this more often than I like
 : Why does this irritate me? Because then I have to wait for it to preheat. This highlights something a little off from these diagrams.
 : usually when we bake, we let the oven preheat while we prep.
 
 * Recipe 
-.image parallel-cake.png
+.image Parallel-Cake.png
 : That is, we performs steps in parallel to save time. This parallelism is only possible because of concurrent nature of the process. 
 
 * Concurrency vs parallelism
@@ -151,7 +151,7 @@ It's concurrent implementation
 * What just happened?
 
 * main vs goroutines
-.image bake-off.png 403 950
+.image Bake-off.png 403 950
 : to prevent this we need some way of coordinating the goroutines
 
 * coordination of goroutines
